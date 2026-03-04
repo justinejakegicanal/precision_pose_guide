@@ -42,6 +42,7 @@ current_software_state = "MENU"
 countdown_timestamp_start = 0
 rest_timer_expiry = 0
 is_user_resting_status = False
+angle_history_list = []
 
 def draw_centered_display_text(img, text, vertical_coordinate_y, font_scale=2, font_thickness=3, 
                                text_color=(255, 255, 255), apply_centering=False):
@@ -120,9 +121,16 @@ while True:
             if rest_timer_value <= 0: is_user_resting_status = False
 
         elif len(pose_landmark_list) != 0:
-            current_joint_angle = fitness_detector.calculate_joint_angle(current_frame, target_joint_indices[0], 
+            raw_joint_angle = fitness_detector.calculate_joint_angle(current_frame, target_joint_indices[0], 
                                                                         target_joint_indices[1], target_joint_indices[2], 
                                                                         pose_landmark_list)
+            
+            # The Smoothing Filter Implementation
+            angle_history_list.append(raw_joint_angle)
+            if len(angle_history_list) > 5:
+                angle_history_list.pop(0)
+            current_joint_angle = sum(angle_history_list) / len(angle_history_list)
+            
             if selected_workout_mode == "Curl":
                 rep_completion_percentage = np.interp(current_joint_angle, (65, 165), (100, 0))
                 visual_progress_bar_y = np.interp(current_joint_angle, (65, 165), (100, 650))
@@ -163,6 +171,7 @@ while True:
                 is_user_resting_status = True
                 rest_timer_expiry = time.time() + (3 * 60)
                 total_rep_count = 0 
+                angle_history_list = [] 
 
             cv2.rectangle(current_frame, (1100, 100), (1175, 650), ui_display_color, 4)
             cv2.rectangle(current_frame, (1100, int(visual_progress_bar_y)), (1175, 650), ui_display_color, cv2.FILLED)
@@ -181,13 +190,13 @@ while True:
         elif keyboard_input_key == ord('3'): selected_workout_mode = "Press"; current_software_state = "GUIDE"
 
     elif current_software_state == "GUIDE" and keyboard_input_key == 13: 
-        current_software_state = "COUNTDOWN"; countdown_timestamp_start = time.time()
+        current_software_state = "COUNTDOWN"; countdown_timestamp_start = time.time(); angle_history_list = []
 
     elif keyboard_input_key == 27: 
-        current_software_state = "MENU"; is_user_resting_status = False; total_rep_count = 0
+        current_software_state = "MENU"; is_user_resting_status = False; total_rep_count = 0; angle_history_list = []
 
     elif current_software_state == "WORKOUT":
-        if keyboard_input_key == ord('r'): total_rep_count = 0 
+        if keyboard_input_key == ord('r'): total_rep_count = 0; angle_history_list = []
 
 video_capture.release()
 cv2.destroyAllWindows()
