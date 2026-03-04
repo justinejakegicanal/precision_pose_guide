@@ -104,11 +104,18 @@ while True:
                 ui_display_color = (0, 255, 0); active_user_feedback = "GO!"
                 if movement_direction_flag == 1:
                     total_rep_count += 0.5; movement_direction_flag = 0
+
+            if int(total_rep_count) == 12:
+                is_user_resting_status = True
+                rest_timer_expiry = time.time() + (3 * 60)
+                total_rep_count = 0 
+                winsound.Beep(2000, 500)
+
             cv2.rectangle(current_frame, (1100, 100), (1175, 650), ui_display_color, 4)
             cv2.rectangle(current_frame, (1100, int(visual_progress_bar_y)), (1175, 650), ui_display_color, cv2.FILLED)
-            draw_centered_display_text(current_frame, f"REPS: {int(total_rep_count)}", 100, font_scale=4)
+            draw_centered_display_text(current_frame, f"REPS: {int(total_rep_count)} / 12", 100, font_scale=4)
             draw_centered_display_text(current_frame, active_user_feedback, 180, font_scale=1.5, text_color=ui_display_color)
-            draw_centered_display_text(current_frame, "[R] RESET | [4] 3m Rest | [5] 5m Rest | [ESC] MENU", 690, font_scale=0.8)
+            draw_centered_display_text(current_frame, "[R] RESET | [ESC] MENU", 690, font_scale=0.8)
 
     cv2.imshow(APP_WINDOW_NAME, current_frame)
     keyboard_input_key = cv2.waitKey(1) & 0xFF
@@ -127,10 +134,6 @@ while True:
 
     elif current_software_state == "WORKOUT":
         if keyboard_input_key == ord('r'): total_rep_count = 0 
-        if keyboard_input_key == ord('4'): 
-            is_user_resting_status = True; rest_timer_expiry = time.time() + (3 * 60)
-        if keyboard_input_key == ord('5'): 
-            is_user_resting_status = True; rest_timer_expiry = time.time() + (5 * 60)
 
 video_capture.release()
 cv2.destroyAllWindows()
