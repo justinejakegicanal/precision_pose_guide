@@ -56,4 +56,4 @@ class PoseDetector():
             cv2.circle(frame_img, (x_wrist, y_wrist), 10, (0, 0, 255), cv2.FILLED)
             cv2.putText(frame_img, str(int(angle_result)), (x_elbow - 50, y_elbow + 50), 
                         cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
-        return angle_result
+        return angle_
