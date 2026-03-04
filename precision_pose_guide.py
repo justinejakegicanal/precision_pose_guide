@@ -125,7 +125,6 @@ while True:
                                                                         target_joint_indices[1], target_joint_indices[2], 
                                                                         pose_landmark_list)
             
-            # The Smoothing Filter Implementation
             angle_history_list.append(raw_joint_angle)
             if len(angle_history_list) > 5:
                 angle_history_list.pop(0)
@@ -178,6 +177,10 @@ while True:
             draw_centered_display_text(current_frame, f"REPS: {int(total_rep_count)} / 12", 100, font_scale=4)
             draw_centered_display_text(current_frame, active_user_feedback, 180, font_scale=1.5, text_color=ui_display_color)
             draw_centered_display_text(current_frame, "[R] RESET | [ESC] MENU", 690, font_scale=0.8)
+
+        # THE NEW INVISIBLE MAN WARNING
+        else:
+            draw_centered_display_text(current_frame, "WARNING: STEP INTO CAMERA VIEW!", 360, font_scale=2, text_color=(0, 0, 255), apply_centering=True)
 
     cv2.imshow(APP_WINDOW_NAME, current_frame)
     keyboard_input_key = cv2.waitKey(1) & 0xFF
