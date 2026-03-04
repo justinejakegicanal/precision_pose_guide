@@ -81,7 +81,7 @@ while True:
         cv2.rectangle(current_frame, (180, 320), (1100, 650), (50, 50, 50), cv2.FILLED)
         cv2.rectangle(current_frame, (180, 320), (1100, 650), (200, 200, 200), 4)
         
-        draw_centered_display_text(current_frame, "--- TEACHER / EXAMINER GUIDE ---", 380, font_scale=1.2, text_color=(0, 255, 255), apply_centering=True)
+        draw_centered_display_text(current_frame, "--- HOW TO USE THIS APP ---", 380, font_scale=1.2, text_color=(0, 255, 255), apply_centering=True)
         draw_centered_display_text(current_frame, "* PRESS [1], [2], OR [3] TO CHOOSE A WORKOUT", 450, font_scale=1, text_color=(255, 255, 255), apply_centering=True)
         draw_centered_display_text(current_frame, "* PRESS [ENTER] ON THE GUIDE SCREEN TO START", 510, font_scale=1, text_color=(255, 255, 255), apply_centering=True)
         draw_centered_display_text(current_frame, "* PRESS [R] DURING WORKOUT TO RESET REPS", 570, font_scale=1, text_color=(255, 255, 255), apply_centering=True)
@@ -99,7 +99,7 @@ while True:
         draw_centered_display_text(current_frame, f"GUIDE: {selected_workout_mode.upper()}", 200, font_scale=3, apply_centering=True)
         draw_centered_display_text(current_frame, workout_instructions, 350, font_scale=1.3, 
                                    text_color=(200, 255, 200), apply_centering=True)
-        draw_centered_display_text(current_frame, "PRESS [ENTER] TO PROCEED", 550, font_scale=2, 
+        draw_centered_display_text(current_frame, "PRESS [ENTER] TO START | [ESC] FOR MENU", 550, font_scale=1.5, 
                                    text_color=(0, 255, 255), apply_centering=True)
 
     elif current_software_state == "COUNTDOWN":
@@ -178,7 +178,6 @@ while True:
             draw_centered_display_text(current_frame, active_user_feedback, 180, font_scale=1.5, text_color=ui_display_color)
             draw_centered_display_text(current_frame, "[R] RESET | [ESC] MENU", 690, font_scale=0.8)
 
-        # THE NEW INVISIBLE MAN WARNING
         else:
             draw_centered_display_text(current_frame, "WARNING: STEP INTO CAMERA VIEW!", 360, font_scale=2, text_color=(0, 0, 255), apply_centering=True)
 
