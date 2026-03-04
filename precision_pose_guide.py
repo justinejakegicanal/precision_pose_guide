@@ -2,11 +2,33 @@ import cv2
 import pose_module as pm
 import numpy as np
 import time
-import winsound 
+import threading
+import queue
+import winsound
 
 APP_WINDOW_NAME = "Precision Pose Guide"
 cv2.namedWindow(APP_WINDOW_NAME, cv2.WND_PROP_FULLSCREEN)
 cv2.setWindowProperty(APP_WINDOW_NAME, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+
+audio_message_queue = queue.Queue()
+
+def background_audio_worker():
+    while True:
+        audio_task = audio_message_queue.get()
+        if audio_task is None: break
+        
+        if audio_task == "FLATLINE_SEQUENCE":
+            winsound.Beep(1100, 5000)
+            for fade_frequency in range(1100, 200, -50):
+                winsound.Beep(fade_frequency, 100)
+        else:
+            frequency, duration = audio_task
+            winsound.Beep(frequency, duration)
+            
+        audio_message_queue.task_done()
+
+audio_worker_thread = threading.Thread(target=background_audio_worker, daemon=True)
+audio_worker_thread.start()
 
 video_capture = cv2.VideoCapture(0)
 fitness_detector = pm.PoseDetector()
@@ -94,22 +116,34 @@ while True:
             elif selected_workout_mode == "Press":
                 rep_completion_percentage = np.interp(current_joint_angle, (200, 290), (100, 0))
                 visual_progress_bar_y = np.interp(current_joint_angle, (200, 290), (100, 650))
-            ui_display_color = (0, 0, 255)
-            if rep_completion_percentage == 100:
-                ui_display_color = (0, 255, 0); active_user_feedback = "EXCELLENT!"
-                if movement_direction_flag == 0:
-                    total_rep_count += 0.5; movement_direction_flag = 1
-                    winsound.Beep(1000, 150)
-            if rep_completion_percentage == 0:
-                ui_display_color = (0, 255, 0); active_user_feedback = "GO!"
-                if movement_direction_flag == 1:
-                    total_rep_count += 0.5; movement_direction_flag = 0
 
-            if int(total_rep_count) == 12:
+            ui_display_color = (0, 0, 255)
+            if total_rep_count < 12:
+                if rep_completion_percentage == 100:
+                    ui_display_color = (0, 255, 0); active_user_feedback = "EXCELLENT!"
+                    if movement_direction_flag == 0:
+                        total_rep_count += 0.5; movement_direction_flag = 1
+                        if total_rep_count < 12: audio_message_queue.put((1500, 200)) 
+
+                if rep_completion_percentage == 0:
+                    ui_display_color = (0, 255, 0); active_user_feedback = "GO!"
+                    if movement_direction_flag == 1:
+                        total_rep_count += 0.5; movement_direction_flag = 0
+
+            if total_rep_count >= 12:
+                cv2.rectangle(current_frame, (1100, 100), (1175, 650), (0, 255, 0), cv2.FILLED)
+                draw_centered_display_text(current_frame, "REPS: 12 / 12", 100, font_scale=4)
+                draw_centered_display_text(current_frame, "SET COMPLETE!", 180, font_scale=1.5, text_color=(0, 255, 0))
+                cv2.imshow(APP_WINDOW_NAME, current_frame)
+                cv2.waitKey(1)
+                
+                # Delay shortened to 0.8 seconds for snappier feedback
+                time.sleep(0.8)
+                audio_message_queue.put("FLATLINE_SEQUENCE")
+                
                 is_user_resting_status = True
                 rest_timer_expiry = time.time() + (3 * 60)
                 total_rep_count = 0 
-                winsound.Beep(2000, 500)
 
             cv2.rectangle(current_frame, (1100, 100), (1175, 650), ui_display_color, 4)
             cv2.rectangle(current_frame, (1100, int(visual_progress_bar_y)), (1175, 650), ui_display_color, cv2.FILLED)
